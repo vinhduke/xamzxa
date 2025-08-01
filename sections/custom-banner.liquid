@@ -1,0 +1,204 @@
+{% schema %}
+{
+  "name": "Custom Fullwidth Banner",
+  "tag": "section",
+  "class": "custom-fullwidth-banner",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "auto_rotate",
+      "label": "Auto-rotate slides",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "transition_style",
+      "label": "Transition Style",
+      "options": [
+        {"value": "fade", "label": "Fade"},
+        {"value": "slide", "label": "Slide"}
+      ],
+      "default": "fade"
+    },
+    {
+      "type": "range",
+      "id": "rotate_interval",
+      "min": 3000,
+      "max": 9000,
+      "step": 1000,
+      "unit": "ms",
+      "label": "Rotation interval",
+      "default": 5000
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "desktop_image",
+          "label": "Desktop Image",
+          "info": "Recommended ratio: 16:9 (e.g., 1800x750px)"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile Image",
+          "info": "Recommended ratio: 9:16 (e.g., 720x1280px)"
+        },
+        {
+          "type": "url",
+          "id": "slide_link",
+          "label": "Slide Link",
+          "info": "Optional link for this slide"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Fullwidth Banner",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{% style %}
+  .custom-fullwidth-banner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .banner-wrapper {
+    display: flex;
+    transition: transform 1s ease-in-out;
+    width: 100%;
+  }
+
+  .banner-slide {
+    position: relative;
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+  }
+
+  .slide-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .slide-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  .slide-link span {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Mobile-specific styles */
+  @media (max-width: 767px) {
+
+    .banner-slide .desktop-image {
+      display: none;
+    }
+    .banner-slide .mobile-image {
+      display: block;
+    }
+  }
+
+  @media (min-width: 768px) {
+    
+    .banner-slide .mobile-image {
+      
+      display: none;
+    }
+    .banner-slide .desktop-image {
+      display: block;
+    }
+  }
+{% endstyle %}
+
+<div class="custom-fullwidth-banner" aria-label="Image carousel">
+  <div class="banner-wrapper">
+    {%- for block in section.blocks -%}
+      <div class="banner-slide" {{ block.shopify_attributes }} data-index="{{ forloop.index0 }}">
+        {%- if block.settings.desktop_image -%}
+          <img 
+            src="{{ block.settings.desktop_image | img_url: 'master' }}" 
+            alt="{{ block.settings.desktop_image.alt | escape }}" 
+            class="slide-image desktop-image"
+            loading="lazy"
+            width="{{ block.settings.desktop_image.width }}"
+            height="{{ block.settings.desktop_image.height }}"
+          >
+        {%- endif -%}
+        
+        {%- if block.settings.mobile_image -%}
+          <img 
+            src="{{ block.settings.mobile_image | img_url: 'master' }}" 
+            alt="{{ block.settings.mobile_image.alt | escape }}" 
+            class="slide-image mobile-image"
+            loading="lazy"
+            width="{{ block.settings.mobile_image.width }}"
+            height="{{ block.settings.mobile_image.height }}"
+          >
+        {%- endif -%}
+        
+        {%- if block.settings.slide_link != blank -%}
+          <a href="{{ block.settings.slide_link }}" class="slide-link" aria-label="Slide link">
+            <span></span>
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const bannerWrapper = document.querySelector('.banner-wrapper');
+  if (!bannerWrapper) return;
+
+  const slides = Array.from(bannerWrapper.querySelectorAll('.banner-slide'));
+  let currentIndex = 0;
+  const totalSlides = slides.length;
+  let autoSlideInterval = null;
+
+  function moveSlide() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    bannerWrapper.style.transform = translateX(-${currentIndex * 100}%);
+  }
+
+  // Auto-rotate control
+  {% if section.settings.auto_rotate %}
+    function startAutoRotate() {
+      autoSlideInterval = setInterval(moveSlide, {{ section.settings.rotate_interval }});
+    }
+    
+    startAutoRotate();
+  {% endif %}
+
+  // Initialize first slide position
+  bannerWrapper.style.transform = translateX(0);
+});
+</script>

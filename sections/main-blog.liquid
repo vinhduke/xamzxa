@@ -1,0 +1,658 @@
+{% comment %}
+  =====================================================================================
+  ENHANCED VERSION - NÚT TRÒN VỚI CHẤM KHÔNG BAO GIỜ BIẾN MẤT
+  =====================================================================================
+{% endcomment %}
+
+<script
+  src="{{ 'blog-posts-list.js' | asset_url }}"
+  type="module"
+></script>
+
+<div class="blog-custom-width-container">
+  <blog-posts-list section-id="{{ section.id }}">
+    <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+    <div
+      class="
+        section
+        color-{{ section.settings.color_scheme }}
+        blog-posts
+        spacing-style
+        size-style
+      "
+      style="{% render 'spacing-style', settings: section.settings %}"
+    >
+      <div class="blog-layout-with-sidebar">
+        {% comment %} Sidebar Column {% endcomment %}
+        <div class="blog-filter-sidebar">
+          <div class="sidebar-card">
+            <h2 class="sidebar-card__main-title">LIST OF ARTICLES</h2>
+            <hr class="sidebar-card__divider">
+            <div class="sidebar-card__content">
+              <h3 class="sidebar-card__sub-title">All Tags</h3>
+              <div class="filter-list-scrollable">
+                <ul class="blog-filter-list" role="list">
+                  {%- for tag in blog.all_tags -%}
+                    <li class="blog-filter-list__item">
+                      {%- if current_tags contains tag -%}
+                        <a href="{{ blog.url }}" class="link-active" aria-current="true">
+                          <span class="radio-button radio-active" data-tag="{{tag | handle}}">
+                            <span class="radio-dot"></span>
+                          </span>
+                          <span class="radio-label">{{- tag -}}</span>
+                        </a>
+                      {%- else -%}
+                        <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="link-inactive">
+                          <span class="radio-button radio-inactive" data-tag="{{tag | handle}}"></span>
+                          <span class="radio-label">{{- tag -}}</span>
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+              {% if current_tags.size > 0 %}
+                <div class="remove-filter-wrapper">
+                  <a href="/blogs/{{ blog.handle }}" class="remove-filters-button">
+                    <span class="remove-icon">✕</span>
+                    <span>Clear Filter</span>
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% comment %} Main blog posts content {% endcomment %}
+        <div class="blog-main-content">
+          {% content_for 'blocks' %}
+          {%- paginate blog.articles by 12 -%}
+            <span ref="viewMorePrevious"></span>
+            <div
+              ref="grid"
+              last-page="{{ paginate.pages }}"
+              class="blog-posts-container"
+            >
+              {% for article in blog.articles %}
+                <div
+                  class="blog-post-item"
+                  ref="cards[]"
+                  data-page="{{ paginate.current_page }}"
+                >
+                  {% content_for 'block', id: 'static-blog-post-card', type: '_blog-post-card', article: article %}
+                </div>
+              {% endfor %}
+            </div>
+            <span ref="viewMoreNext"></span>
+          {%- endpaginate -%}
+        </div>
+      </div>
+    </div>
+  </blog-posts-list>
+</div>
+
+{% stylesheet %}
+  /* ============================================= */
+  /* === RADIO BUTTON SYSTEM - BULLETPROOF ====== */
+  /* ============================================= */
+
+  /* Container */
+  .blog-custom-width-container {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  .blog-layout-with-sidebar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  @media screen and (min-width: 990px) {
+    .blog-layout-with-sidebar {
+      grid-template-columns: 320px 1fr;
+      gap: 5rem;
+    }
+  }
+
+  /* Sidebar Card */
+  .sidebar-card {
+    background-color: rgb(var(--color-background));
+    border: 1px solid rgba(var(--color-foreground), 0.1);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .sidebar-card__main-title {
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.15rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .sidebar-card__divider {
+    border: none;
+    border-top: 1px solid rgba(var(--color-foreground), 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .sidebar-card__sub-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+  }
+
+  /* Filter List */
+  .filter-list-scrollable {
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 1rem;
+  }
+
+  .blog-filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .blog-filter-list__item {
+    margin-bottom: 1rem;
+  }
+
+  .blog-filter-list__item a {
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    color: #374151 !important;
+    padding: 0.5rem 0 !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .blog-filter-list__item a:hover {
+    opacity: 0.8 !important;
+  }
+
+  /* === RADIO BUTTON CORE STYLES === */
+  .radio-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    border-radius: 50% !important;
+    border: 2px solid #d1d5db !important;
+    margin-right: 12px !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    background: white !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* Active State */
+  .radio-active {
+    border-color: #374151 !important;
+  }
+
+  /* The DOT - Using real element instead of pseudo */
+  .radio-dot {
+    display: block !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background-color: #374151 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+
+  /* Hide dot for inactive state */
+  .radio-inactive .radio-dot {
+    display: none !important;
+  }
+
+  /* Force visibility for active dots */
+  .radio-active .radio-dot {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Label */
+  .radio-label {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    color: #374151 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* === REMOVE FILTER BUTTON === */
+  .remove-filter-wrapper {
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  .remove-filters-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #6b7280 !important;
+    background-color: transparent !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 16px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .remove-filters-button:hover {
+    color: #374151 !important;
+    border-color: #9ca3af !important;
+    background-color: #f9fafb !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .remove-icon {
+    font-size: 10px !important;
+    opacity: 0.7 !important;
+  }
+
+  /* Scrollbar */
+  .filter-list-scrollable::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .filter-list-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .filter-list-scrollable::-webkit-scrollbar-thumb {
+    background-color: rgba(var(--color-foreground), 0.2);
+    border-radius: 10px;
+  }
+
+  /* Responsive */
+  @media screen and (max-width: 749px) {
+    .sidebar-card {
+      padding: 2rem;
+    }
+
+    .radio-button {
+      width: 18px !important;
+      height: 18px !important;
+      min-width: 18px !important;
+      min-height: 18px !important;
+    }
+
+    .radio-dot {
+      width: 8px !important;
+      height: 8px !important;
+    }
+  }
+
+  /* === BLOG POSTS GRID === */
+  .blog-posts {
+    --page-content-width: var(--narrow-page-width);
+    --page-width: 100%;
+    --columns-gap: 36px;
+    --rows-gap: 36px;
+  }
+
+  .blog-posts-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    width: 100%;
+    column-gap: var(--columns-gap);
+    row-gap: var(--rows-gap);
+  }
+
+  .blog-post-item {
+    grid-column: span 1;
+    --blog-post-card-scale: 0.9;
+    border: 1px solid rgba(from var(--color-foreground) r g b / 0.2);
+    padding: 0 1rem 1rem;
+  }
+
+  .blog-post-item:has(.blog-post-card__image-container) {
+    border: none;
+    padding: 0;
+  }
+
+  @media screen and (max-width: 1200px) {
+    .blog-posts-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .blog-posts-container {
+      grid-template-columns: repeat(1, 1fr);
+    }
+    .blog-post-item {
+      grid-column: span 1;
+      --blog-post-card-scale: 0.6;
+    }
+  }
+{% endstylesheet %}
+
+<!-- ENHANCED RADIO BUTTON PROTECTION SYSTEM -->
+<script>
+(function() {
+  'use strict';
+  
+  let protectionEnabled = false;
+  let checkInterval = null;
+  
+  function log(msg) {
+    console.log('[RadioProtection]: ' + msg);
+  }
+  
+  function createProtectiveDot(radioButton) {
+    // Remove any existing dots first
+    const existingDots = radioButton.querySelectorAll('.radio-dot, .protective-dot');
+    existingDots.forEach(dot => dot.remove());
+    
+    // Create new protective dot
+    const dot = document.createElement('span');
+    dot.className = 'radio-dot protective-dot';
+    dot.style.cssText = `
+      width: 10px !important;
+      height: 10px !important;
+      background: #374151 !important;
+      border-radius: 50% !important;
+      display: block !important;
+      position: relative !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: none !important;
+      z-index: 999999 !important;
+    `;
+    dot.setAttribute('data-protective', 'true');
+    
+    radioButton.appendChild(dot);
+    return dot;
+  }
+  
+  function ensureActiveDots() {
+    const activeButtons = document.querySelectorAll('.radio-active');
+    
+    activeButtons.forEach(radioButton => {
+      // Check if dot exists and is visible
+      const existingDot = radioButton.querySelector('.radio-dot[data-protective="true"]');
+      
+      if (!existingDot) {
+        log('Creating missing protective dot');
+        createProtectiveDot(radioButton);
+      } else {
+        // Ensure the dot is still visible
+        const computed = window.getComputedStyle(existingDot);
+        if (computed.display === 'none' || computed.opacity === '0' || computed.visibility === 'hidden') {
+          log('Restoring hidden dot');
+          existingDot.style.cssText = `
+            width: 10px !important;
+            height: 10px !important;
+            background: #374151 !important;
+            border-radius: 50% !important;
+            display: block !important;
+            position: relative !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: none !important;
+            z-index: 999999 !important;
+          `;
+        }
+      }
+    });
+  }
+  
+  function setActiveState() {
+    log('Setting active state...');
+    
+    const currentURL = window.location.href;
+    log('Current URL: ' + currentURL);
+    
+    // Reset all states and remove dots
+    document.querySelectorAll('.radio-button').forEach(btn => {
+      btn.classList.remove('radio-active');
+      btn.classList.add('radio-inactive');
+      
+      // Remove all dots from inactive buttons
+      const dots = btn.querySelectorAll('.radio-dot, .protective-dot');
+      dots.forEach(dot => dot.remove());
+    });
+    
+    // Find and set active with protective dots
+    let foundActive = false;
+    document.querySelectorAll('.blog-filter-list__item a').forEach(link => {
+      if (link.href === currentURL) {
+        const radioBtn = link.querySelector('.radio-button');
+        if (radioBtn) {
+          radioBtn.classList.remove('radio-inactive');
+          radioBtn.classList.add('radio-active');
+          createProtectiveDot(radioBtn);
+          foundActive = true;
+          log('Set active with protective dot for: ' + link.href);
+        }
+      }
+    });
+    
+    if (!foundActive) {
+      log('No exact URL match found, checking for tag-based matches');
+      // Alternative: check based on URL patterns
+      const urlParts = currentURL.split('/tagged/');
+      if (urlParts.length > 1) {
+        const tagSlug = urlParts[1].split('?')[0];
+        document.querySelectorAll('.radio-button[data-tag]').forEach(btn => {
+          if (btn.getAttribute('data-tag') === tagSlug) {
+            btn.classList.remove('radio-inactive');
+            btn.classList.add('radio-active');
+            createProtectiveDot(btn);
+            log('Set active via tag match for: ' + tagSlug);
+          }
+        });
+      }
+    }
+  }
+  
+  function startProtection() {
+    if (protectionEnabled) return;
+    
+    log('Starting protection system...');
+    protectionEnabled = true;
+    
+    // Initial setup
+    setActiveState();
+    
+    // Continuous protection - check every 1 second
+    checkInterval = setInterval(() => {
+      ensureActiveDots();
+    }, 1000);
+    
+    // MutationObserver for real-time protection
+    const observer = new MutationObserver((mutations) => {
+      let needsCheck = false;
+      
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          // Check if any radio-dot was removed
+          mutation.removedNodes.forEach((node) => {
+            if (node.nodeType === 1 && (node.classList.contains('radio-dot') || node.classList.contains('protective-dot'))) {
+              needsCheck = true;
+            }
+          });
+        }
+        
+        if (mutation.type === 'attributes' && 
+            (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+          const target = mutation.target;
+          if (target.classList.contains('radio-dot') || target.classList.contains('protective-dot')) {
+            needsCheck = true;
+          }
+        }
+      });
+      
+      if (needsCheck) {
+        log('DOM mutation detected, checking dots...');
+        setTimeout(ensureActiveDots, 10);
+      }
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+    
+    log('Protection system active');
+  }
+  
+  function forceStyles() {
+    const style = document.createElement('style');
+    style.id = 'radio-protection-styles';
+    style.textContent = `
+      .radio-button {
+        display: flex !important;
+        width: 20px !important;
+        height: 20px !important;
+        border: 2px solid #d1d5db !important;
+        border-radius: 50% !important;
+        margin-right: 12px !important;
+        background: white !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+      }
+      .radio-active {
+        border-color: #374151 !important;
+      }
+      .protective-dot,
+      .radio-dot {
+        width: 10px !important;
+        height: 10px !important;
+        background: #374151 !important;
+        border-radius: 50% !important;
+        display: block !important;
+        position: relative !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: none !important;
+        z-index: 999999 !important;
+      }
+      .radio-inactive .protective-dot,
+      .radio-inactive .radio-dot {
+        display: none !important;
+      }
+      .radio-label {
+        font-size: 14px !important;
+      }
+    `;
+    
+    document.head.appendChild(style);
+    log('Protection styles applied');
+  }
+  
+  function init() {
+    log('Initializing protection system...');
+    forceStyles();
+    
+    // Multiple start attempts
+    setTimeout(startProtection, 100);
+    setTimeout(startProtection, 500);
+    setTimeout(startProtection, 1000);
+    setTimeout(startProtection, 2000);
+  }
+  
+  // Multiple initialization triggers
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  
+  window.addEventListener('load', () => {
+    setTimeout(init, 500);
+  });
+  
+  // Page visibility change (tab switching)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && protectionEnabled) {
+      setTimeout(ensureActiveDots, 100);
+    }
+  });
+  
+  // Focus events
+  window.addEventListener('focus', () => {
+    if (protectionEnabled) {
+      setTimeout(ensureActiveDots, 100);
+    }
+  });
+  
+})();
+</script>
+
+{% schema %}
+{
+  "name": "t:names.blog_posts",
+  "blocks": [
+    { "type": "@theme" },
+    { "type": "@app" },
+    { "type": "text" },
+    { "type": "icon" },
+    { "type": "image" },
+    { "type": "button" },
+    { "type": "video" },
+    { "type": "group" },
+    { "type": "spacer" },
+    { "type": "_divider" }
+  ],
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    }
+  ]
+}
+{% endschema %}
