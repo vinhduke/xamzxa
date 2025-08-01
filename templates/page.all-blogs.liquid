@@ -1,0 +1,524 @@
+{% comment %}
+Template: page.all-blogs.liquid
+Display all health & wellness blog categories
+{% endcomment %}
+
+{% comment %} List of all blog handles {% endcomment %}
+{% assign blog_handles = 'anti-aging-healthy-longevity,brain-health-cognitive-function,digestive-gut-health,blood-circulation-heart-health,immune-system-boost-protection,bone-joint-mobility-care,detox-kidney-liver-health,energy-boost-physical-performance,weight-loss-fat-burning,herbal-supplements,mental-health-emotional-wellbeing' | split: ',' %}
+
+<div class="health-blogs-container">
+  <header class="page-intro">
+    <h1 class="page-title">{{ page.title }}</h1>
+    {% if page.content != blank %}
+      <div class="page-description">
+        {{ page.content }}
+      </div>
+    {% else %}
+      <div class="page-description">
+        <p>Discover expert insights on nutrition, wellness, and healthy living. Explore our comprehensive collection of health-focused content designed to support your wellness journey.</p>
+      </div>
+    {% endif %}
+    <div class="content-stats">
+      <span class="stat-badge">
+        <strong>{{ blog_handles.size }}</strong> Health Categories
+      </span>
+      {% assign total_articles = 0 %}
+      {% for handle in blog_handles %}
+        {% assign blog = blogs[handle] %}
+        {% if blog != blank %}
+          {% assign total_articles = total_articles | plus: blog.articles.size %}
+        {% endif %}
+      {% endfor %}
+      <span class="stat-badge">
+        <strong>{{ total_articles }}</strong> Expert Articles
+      </span>
+    </div>
+  </header>
+
+  <section class="wellness-categories">
+    <div class="categories-grid">
+      {% for handle in blog_handles %}
+        {% assign blog = blogs[handle] %}
+        {% if blog != blank %}
+          <article class="category-card">
+            <div class="card-header">
+              <div class="category-icon">
+                {% case handle %}
+                  {% when 'anti-aging-healthy-longevity' %}
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  {% when 'brain-health-cognitive-function' %}
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12A3 3 0 1 0 12 9A3 3 0 0 0 9 12zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                  {% when 'digestive-gut-health' %}
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  {% else %}
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                {% endcase %}
+              </div>
+              <h2 class="category-title">
+                <a href="{{ blog.url }}">{{ blog.title }}</a>
+              </h2>
+            </div>
+            
+            {% if blog.summary != blank %}
+              <div class="category-description">
+                {{ blog.summary }}
+              </div>
+            {% endif %}
+
+            <div class="category-stats">
+              <span class="articles-count">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
+                {{ blog.articles.size }} Article{% unless blog.articles.size == 1 %}s{% endunless %}
+              </span>
+            </div>
+
+            {% comment %} Latest Articles Preview {% endcomment %}
+            {% if blog.articles.size > 0 %}
+              <div class="recent-content">
+                <h3 class="recent-title">Latest Articles</h3>
+                <ul class="recent-articles">
+                  {% for article in blog.articles limit: 3 %}
+                    <li class="article-item">
+                      <a href="{{ article.url }}" class="article-link">
+                        <span class="article-title">{{ article.title | truncate: 55 }}</span>
+                        <time class="article-date" datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+                          {{ article.published_at | date: '%b %d, %Y' }}
+                        </time>
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+                
+                {% if blog.articles.size > 3 %}
+                  <a href="{{ blog.url }}" class="explore-category">
+                    <span>Explore All Articles</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                  </a>
+                {% endif %}
+              </div>
+            {% else %}
+              <div class="coming-soon">
+                <p>New articles coming soon!</p>
+                <span class="coming-soon-badge">Stay Tuned</span>
+              </div>
+            {% endif %}
+          </article>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<style>
+/* Health & Wellness Blog Categories - Clean Design */
+.health-blogs-container {
+  margin: 0 30px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: #2d3748;
+  line-height: 1.6;
+}
+
+/* Page Introduction */
+.page-intro {
+  text-align: center;
+  padding: 3rem 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.page-description {
+  font-size: 1.1rem;
+  color: #4a5568;
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+
+.page-description p {
+  margin: 0;
+}
+
+.content-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.stat-badge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.stat-badge strong {
+  font-size: 2rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Categories Grid */
+.wellness-categories {
+  padding: 2rem 0;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 2rem;
+}
+
+/* Category Cards */
+.category-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(116, 75, 162, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.category-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.category-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.category-title a {
+  color: #2d3748;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.category-title a:hover {
+  color: #667eea;
+}
+
+/* Category Description */
+.category-description {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Category Stats */
+.category-stats {
+  margin-bottom: 1.5rem;
+}
+
+.articles-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.articles-count svg {
+  opacity: 0.8;
+}
+
+/* Recent Content */
+.recent-content {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
+}
+
+.recent-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.recent-articles {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.article-item {
+  margin-bottom: 0.75rem;
+}
+
+.article-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  text-decoration: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  group: true;
+}
+
+.article-link:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.article-title {
+  color: #4a5568;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  flex: 1;
+  transition: color 0.2s ease;
+}
+
+.article-link:hover .article-title {
+  color: #667eea;
+}
+
+.article-date {
+  color: #a0aec0;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* Explore Category Button */
+.explore-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.explore-category:hover {
+  background: #667eea;
+  color: white;
+  transform: translateX(4px);
+}
+
+.explore-category svg {
+  transition: transform 0.3s ease;
+}
+
+.explore-category:hover svg {
+  transform: translateX(2px);
+}
+
+/* Coming Soon */
+.coming-soon {
+  text-align: center;
+  padding: 2rem 0;
+  color: #a0aec0;
+}
+
+.coming-soon p {
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.coming-soon-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd89b, #19547b);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .health-blogs-container {
+    margin: 0 15px;
+  }
+  
+  .page-intro {
+    padding: 2rem 0;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+  }
+  
+  .page-description {
+    font-size: 1rem;
+  }
+  
+  .content-stats {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .category-card {
+    padding: 1.5rem;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .category-icon {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .health-blogs-container {
+    margin: 0 10px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .category-card {
+    padding: 1.25rem;
+  }
+  
+  .article-link {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .article-date {
+    margin-top: 0;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .health-blogs-container {
+    color: #e2e8f0;
+  }
+  
+  .page-title {
+    color: #e2e8f0;
+  }
+  
+  .page-description {
+    color: #a0aec0;
+  }
+  
+  .category-card {
+    background: #2d3748;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .category-title a {
+    color: #e2e8f0;
+  }
+  
+  .category-title a:hover {
+    color: #90cdf4;
+  }
+  
+  .category-description {
+    color: #a0aec0;
+  }
+  
+  .recent-content {
+    border-color: #4a5568;
+  }
+  
+  .recent-title {
+    color: #e2e8f0;
+  }
+  
+  .article-title {
+    color: #cbd5e0;
+  }
+  
+  .article-link:hover {
+    background: rgba(144, 205, 244, 0.1);
+  }
+  
+  .article-link:hover .article-title {
+    color: #90cdf4;
+  }
+}
+</style>
